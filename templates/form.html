@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather Classification Input</title>
+</head>
+<body>
+    <h1>Weather Classification:</h1>
+    <p><strong> Enter measurements below<strong><p>
+
+    {% if error %}
+    <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST" action="/">
+        <label>Temperature (F): <input type="number" step="any" name="temperature" required></label><br>
+        <label>Pressure: <input type="number" step="any" name="pressure" required></label><br>
+        <label>Humidity: <input type="number" step="any" name="humidity" required></label><br>
+        <label>Wind Speed: <input type="number" step="any" name="wind_speed" required></label><br>
+        <label>Wind Degree: <input type="number" step="any" name="wind_deg" required></label><br>
+        <label>Rain 1h: <input type="number" step="any" name="rain_1h"></label><br>
+        <label>Rain 3h: <input type="number" step="any" name="rain_3h"></label><br>
+        <label>Snow: <input type="number" step="any" name="snow"></label><br>
+        <label>Clouds: <input type="number" step="any" name="clouds"></label><br><br>
+        <button type="submit">Predict</button>
+    </form>
+</body>
+</html>
