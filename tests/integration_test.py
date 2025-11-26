@@ -2,6 +2,8 @@ import unittest
 from app import app  # Import your Flask app instance
 
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 class TestModelAppIntegration(unittest.TestCase):
 
 	def setUp(self):

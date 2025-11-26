@@ -1,6 +1,8 @@
 import unittest
 from app import app
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 class TestAppSmoke(unittest.TestCase):
 	def setUp(self):
 		app.testing = True
