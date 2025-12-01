@@ -1,23 +1,25 @@
 from flask import Flask, request, render_template
-import pickle
+import joblib
 import numpy as np
 import time
 
 app = Flask(__name__)
+#Changed rainy to rain
+weather_classes = ['clear', 'cloudy', 'drizzly', 'foggy', 'hazey', 'misty', 'rain', 'smokey', 'thunderstorm']
 
-weather_classes = ['clear', 'cloudy', 'drizzly', 'foggy', 'hazey', 'misty', 'rainy', 'smokey', 'thunderstorm']
-
-def load_model(model_path = 'model/model.pkl'):
-	return pickle.load(open(model_path, 'rb'))
+# FIX 1: Point to model in the root directory
+def load_model(model_path = 'weather_model.pkl'):
+	with open(model_path, 'rb') as file: # Fix resource warning
+		return joblib.load(file)
 
 def classify_weather(features):
 	model = load_model()
 	start = time.time()
-	prediction_index = model.predict(features)[0]
+	prediction = model.predict(features)[0]
 	latency = round((time.time() - start) * 1000, 2) #we are here
-	prediction = weather_classes[1]
+# Fix 2: Removed the harcoded line so we can actually return the models prediction
 	
-	return prediction, latency
+	return prediction, latency # corrected return
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -34,11 +36,11 @@ def home():
 			rain_3h = float(request.form.get('rain_3h', 0) or 0)
 			snow = float(request.form.get('snow', 0) or 0)
 			clouds = float(request.form.get('clouds', 0) or 0)
-
+			# Fix 3: Ensure all inputs are converted to float
 			features = np.array([
-				temperature, pressure, humidity,
-				wind_speed, wind_deg, rain_1h,
-				rain_3h, snow, clouds
+				float(temperature),float(pressure), float(humidity),
+				float(wind_speed), float(wind_deg), float(rain_1h),
+				float(rain_3h), float(snow), float(clouds)
 			]).reshape(1, -1)
 
 			
@@ -49,7 +51,7 @@ def home():
 
 		except Exception as e:
 			error_msg = f"Error processing input: {e}"
-			return render_template('form.html', error=error_msg)
+			return render_template('form.html', error=error_msg), 400 # Fix 4: Return 400 status code
 	# GET method: show the input form
 	return render_template('form.html')
 

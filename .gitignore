@@ -1,1 +1,8 @@
-__pycache__/
+
+*.pyc
+pycache/
+
+venv/
+.venv/
+
+weather_model.pkl
