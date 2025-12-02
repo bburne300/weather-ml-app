@@ -8,9 +8,9 @@ WORKDIR /app
 
 COPY . /app 
 
-# Install Flask and Gunicorn  
+# Installs dependencies from file  
 
-RUN pip install --no-cache-dir flask gunicorn 
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Make port 5000 available to the world outside this container 
 
