@@ -1,0 +1,54 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ] # Triggers the pipeline when you push to main
+
+jobs:
+  build-test-ship:
+    # Use 'self-hosted' to force this to run on your EC2 Build Server
+    runs-on: self-hosted
+
+    steps:
+    # 1. Checkout the code from the repository
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. Set up Python environment
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    # 3. Install Dependencies (Flask and Gunicorn)
+    - name: Install Dependencies
+      run: |
+        pip install Flask gunicorn
+        # Installs any other dependencies listed in your requirements.txt
+        # pip install -r requirements.txt
+
+    # 4. Run All 3 Tests 
+    - name: Run Smoke Test
+      run: python3 -m unittest smoke_test.py
+
+    - name: Run Unit Test
+      run: python3 -m unittest unit_test.py
+
+    - name: Run Integration Test
+      run: python3 -m unittest integration_test.py
+
+    # 5. Login to DockerHub (Uses the Secrets you set in Task 1.5)
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASS }}
+
+    # 6. Build and Push the Docker Image
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        # Tags the image with 'v1' as per early coursework tasks
+        tags: ${{ secrets.DOCKER_USER }}/weather-ml-app:v1
