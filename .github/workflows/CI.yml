@@ -17,14 +17,16 @@ jobs:
       with:
         python-version: '3.9'
 
-    # FIXED: Install from requirements.txt to get scikit-learn/pandas
     - name: Install Dependencies
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
 
-    # FIXED: Added 'tests/' prefix to finding the files
-    # We set PYTHONPATH to . so the tests inside the folder can find 'app.py' in the root
+    # --- ADD THIS STEP HERE ---
+    - name: Train Model
+      run: python3 train_model.py
+    # --------------------------
+
     - name: Run Smoke Test
       run: |
         export PYTHONPATH=$PYTHONPATH:.
