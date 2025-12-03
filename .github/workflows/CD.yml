@@ -1,0 +1,31 @@
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    # Only run if the CI pipeline actually succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Production Server
+        run: |
+          # 1. Create a secure private key file from the Secret PEM
+          echo "${{ secrets.PROD_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+
+          # 2. SSH into Production Server and update the Kubernetes Deployment
+          # We disable StrictHostKeyChecking to prevent the interactive "yes/no" prompt
+          # The command tells K8s to update the 'weather-app' container with the 'v1' image
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.PROD_IP }} "kubectl set image deployment/weather-app weather-app=${{ secrets.DOCKER_USER }}/weather-ml-app:v1"
+
+          # 3. Cleanup: Remove the key file for security
+          rm -f private_key.pem
