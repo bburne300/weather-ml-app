@@ -22,10 +22,11 @@ jobs:
           echo "${{ secrets.PROD_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
-          # 2. SSH into Production Server and update the Kubernetes Deployment
-          # We disable StrictHostKeyChecking to prevent the interactive "yes/no" prompt
-          # The command tells K8s to update the 'weather-app' container with the 'v1' image
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.PROD_IP }} "kubectl set image deployment/weather-app weather-ml-app=${{ secrets.DOCKER_USER }}/weather-ml-app:v1"
+          # 2. SSH into Production Server with robust deployment logic
+          # - docker system prune -af: Cleans unused images to free up space (Critical for your 460MB limit)
+          # - kubectl set image: Updates the deployment
+          # - kubectl rollout status: WAITS for success. Fails the pipeline if the pods crash (No silent failures)
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.PROD_IP }} "docker system prune -af && kubectl set image deployment/weather-app weather-ml-app=${{ secrets.DOCKER_USER }}/weather-ml-app:v1 && kubectl rollout status deployment/weather-app"
 
           # 3. Cleanup: Remove the key file for security
           rm -f private_key.pem
