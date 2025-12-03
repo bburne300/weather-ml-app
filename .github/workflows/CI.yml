@@ -9,6 +9,19 @@ jobs:
     runs-on: self-hosted
 
     steps:
+    # --- NEW CLEANUP STEP (Solution 2) ---
+    # This prevents "No space left on device" errors by cleaning up before every run
+    - name: Pre-run Disk Cleanup
+      run: |
+        echo "Cleaning up disk space..."
+        # Remove unused docker images/containers/volumes
+        docker system prune -a -f --volumes || true
+        # Clear GitHub Runner tool cache (large Python downloads)
+        sudo rm -rf /home/ubuntu/actions-runner/_work/_tool/* || true
+        # Clear Runner temp files
+        sudo rm -rf /home/ubuntu/actions-runner/_work/_temp/* || true
+    # -------------------------------------
+
     # 1. Checkout Code
     - name: Checkout Code
       uses: actions/checkout@v4
